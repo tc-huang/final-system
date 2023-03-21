@@ -41,25 +41,25 @@ const router = createBrowserRouter([
         //         errorElement: <ErrorPage />,
         //     },
             {
+                path: "todays-news",
+                element: <TodaysNews />,
+                errorElement: <ErrorPage />,
+            },
+            {
                 path: "all-person",
                 element: <AllPerson />,
                 errorElement: <ErrorPage />,
             },
-        //     {
-        //         path: "person/:name",
-        //         element: <Person />,
-        //         errorElement: <ErrorPage />,
-        //     },
+            // {
+            //     path: "person/:name",
+            //     element: <Person />,
+            //     errorElement: <ErrorPage />,
+            // },
         //     {
         //         path: "news/:news_id",
         //         element: <News />,
         //         errorElement: <ErrorPage />,
         //     },
-            {
-                path: "todays-news",
-                element: <TodaysNews />,
-                errorElement: <ErrorPage />,
-            },
         //     {
         //         path: "election",
         //         element: <Election />,

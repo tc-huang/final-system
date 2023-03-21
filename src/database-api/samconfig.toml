@@ -2,10 +2,10 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "database-api"
+stack_name = "postgresql-api"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-10k1sggy6skj3"
-s3_prefix = "database-api"
+s3_prefix = "postgresql-api"
 region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-image_repositories = ["DataBaseAPIFunction=718000052173.dkr.ecr.us-east-1.amazonaws.com/databaseapie7ad99cc/databaseapifunctionf137d041repo"]
+image_repositories = ["DataBaseAPIFunction=718000052173.dkr.ecr.us-east-1.amazonaws.com/postgresqlapi49673a79/databaseapifunctionf137d041repo"]
