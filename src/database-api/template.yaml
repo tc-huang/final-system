@@ -30,6 +30,21 @@ Resources:
           Properties:
             Path: /person
             Method: post
+        ClusterAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /cluster
+            Method: post
+        PersonNewsAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /person-news
+            Method: post
+        PersonInfoAPI:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /person-info
+            Method: post 
     Metadata:
       Dockerfile: Dockerfile
       DockerContext: ./lambda_function

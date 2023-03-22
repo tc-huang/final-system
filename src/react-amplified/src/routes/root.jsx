@@ -23,8 +23,13 @@ const items = [
   },
   {
     icon: <DoubleRightOutlined />,
-    tag: "瀏覽新聞",
+    tag: "依時間軸瀏覽新聞",
     path: "/todays-news",
+  },
+  {
+    icon: <DoubleRightOutlined />,
+    tag: "依分群瀏覽新聞",
+    path: "/cluster",
   },
   // {
   //   icon: <DoubleRightOutlined />,

@@ -14,7 +14,8 @@ import Root from "./routes/root";
 
 // import DashBoard from './components/DashBoard';
 import AllPerson from "./components/AllPerson";
-// import Person from "./components/Person";
+import Person from "./components/Person";
+import Cluster from "./components/Cluster";
 
 
 import TodaysNews from "./components/TodaysNews";
@@ -50,11 +51,16 @@ const router = createBrowserRouter([
                 element: <AllPerson />,
                 errorElement: <ErrorPage />,
             },
-            // {
-            //     path: "person/:name",
-            //     element: <Person />,
-            //     errorElement: <ErrorPage />,
-            // },
+            {
+                path: "person/:name",
+                element: <Person />,
+                errorElement: <ErrorPage />,
+            },
+            {
+                path: "cluster",
+                element: <Cluster />,
+                errorElement: <ErrorPage />,
+            }
         //     {
         //         path: "news/:news_id",
         //         element: <News />,

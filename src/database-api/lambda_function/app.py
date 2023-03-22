@@ -3,6 +3,9 @@ import get_data_functions.psycopg_methods as psycopg_methods
 import get_data_functions.news_data_select as news_data_select
 import get_data_functions.dailyview_person_data as dailyview_person_data
 import get_data_functions.timeline_data as timeline_data
+import get_data_functions.topic_cluster_data as topic_cluster_data
+import get_data_functions.person_news_data as person_news_data
+import get_data_functions.person_info_data as person_info_data
 
 def lambda_handler(event, context):
     """Sample pure Lambda function
@@ -46,6 +49,26 @@ def lambda_handler(event, context):
                 result = dailyview_person_data.get_name_party_title_category_imageurl_rank(category)
             else:
                 result = dailyview_person_data.get_name_party_title_category_imageurl_rank()
+
+        elif api_path == "/person-news":
+            if 'name' in post_params:
+                name = post_params['name']
+                result = person_news_data.get_timeline_data(name)
+            else:
+                result = {
+                    "message": "SQL not found in POST parameter 'name'"
+                }
+        elif api_path == "/person-info":
+            if 'name' in post_params:
+                name = post_params['name']
+                result = person_info_data.get_person_info(name)
+            else:
+                result = {
+                    "message": "SQL not found in POST parameter 'name'"
+                }
+        
+        elif api_path == "/cluster":
+            result = topic_cluster_data.get_topic_cluster_data()
         
         elif api_path == "/sql":
             if 'sql' in post_params:
@@ -53,7 +76,7 @@ def lambda_handler(event, context):
                 result = psycopg_methods.execute_sql(sql)
             else:
                 result = {
-                    "message": "SQL not found in POST parameters"
+                    "message": "SQL not found in POST parameter 'sql'"
                 }
         else:
             result = {
