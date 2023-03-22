@@ -54,7 +54,7 @@ function TimeLine(props) {
                 <TimelineContent>
                   <Link to={"/news/" + val.id}>{val.title}</Link>
                   <Collapse ghost>
-                    <Panel header="read opinion">
+                    <Panel header="閱讀人物意見">
                       <>
                         {val.opinion_list.map((value) => {
                           return (
