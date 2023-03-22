@@ -1,7 +1,8 @@
 import json
+import get_data_functions.psycopg_methods as psycopg_methods
 import get_data_functions.news_data_select as news_data_select
 import get_data_functions.dailyview_person_data as dailyview_person_data
-
+import get_data_functions.timeline_data as timeline_data
 
 def lambda_handler(event, context):
     """Sample pure Lambda function
@@ -36,7 +37,8 @@ def lambda_handler(event, context):
             post_params = None 
         
         if api_path == "/news":
-            result = news_data_select.get_time_source_title_url_news_uid()
+            # result = news_data_select.get_time_source_title_url_news_uid()
+            result = timeline_data.get_timeline_data()
         
         elif api_path == "/person":
             if 'category' in post_params:
@@ -44,13 +46,21 @@ def lambda_handler(event, context):
                 result = dailyview_person_data.get_name_party_title_category_imageurl_rank(category)
             else:
                 result = dailyview_person_data.get_name_party_title_category_imageurl_rank()
-
+        
+        elif api_path == "/sql":
+            if 'sql' in post_params:
+                sql = post_params['sql']
+                result = psycopg_methods.execute_sql(sql)
+            else:
+                result = {
+                    "message": "SQL not found in POST parameters"
+                }
         else:
             result = {
                 "message": "API path not found"
             }
         
-        print(json.dumps(result, indent=4, ensure_ascii=False))
+        print(json.dumps(result, indent=4, ensure_ascii=False, default=str))
         
         return {
             "statusCode": 200,
@@ -59,7 +69,7 @@ def lambda_handler(event, context):
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS, POST, GET'
                 },
-            "body": json.dumps(result, indent=4, ensure_ascii=False),
+            "body": json.dumps(result, indent=4, ensure_ascii=False, default=str),
         }
     
     except Exception as e:
@@ -78,7 +88,8 @@ def lambda_handler(event, context):
                     "error": str(e)
                 },
                 indent=4,
-                ensure_ascii=False
+                ensure_ascii=False,
+                default=str
             ),
         }
 

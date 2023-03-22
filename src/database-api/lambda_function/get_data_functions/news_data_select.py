@@ -8,14 +8,5 @@ def get_time_source_title_url_news_uid()->dict:
         ORDER BY n.time DESC;
         """
     rows = psycopg_methods.execute_sql(sql)
-
-    result = [
-        {
-            "time": str(row[0]),
-            "title": row[1],
-            "url": row[2],
-            "uid": str(row[3])
-        } for row in rows
-    ]
-
-    return result
+    
+    return rows

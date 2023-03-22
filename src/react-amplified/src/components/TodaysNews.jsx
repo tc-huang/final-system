@@ -53,32 +53,26 @@ function TimeLine(props) {
                 </TimelineSeparator>
                 <TimelineContent>
                   <Link to={"/news/" + val.id}>{val.title}</Link>
-                  {/* <Collapse ghost>
+                  <Collapse ghost>
                     <Panel header="read opinion">
                       <>
-                        <div>
-                          <a href={val.url}>[{val.media}原文]</a>
-                        </div>
-                        {val.opinion_paragraph_pair.map((value) => {
+                        {val.opinion_list.map((value) => {
                           return (
                             <>
                               <Card>
                                 <Title level={5}>
-                                  {value.name}({value.WHO})
+                                  {value.OPINION_SRC_found.join(" ")}
                                 </Title>
                                 <Title level={4} type="danger">
-                                  {value.VERB}
+                                  {value.OPINION_OPR_found.join(" ")}
                                 </Title>
-                                {/* <Title level={5}>{value.opinion_list.join(" ")}</Title> */}
-                                {/* <Collapse ghost>
-                                  <Panel
-                                    header={
-                                      value.opinion_list &&
-                                      value.opinion_list.join(" ")
-                                    }
-                                  >
+                                <Title level={5}>
+                                  {value.OPINION_SEG_found.join("\n")}
+                                </Title>
+                                <Collapse ghost>
+                                  <Panel header="來源段落">
                                     <Title level={5} type="secondary">
-                                      {value.paragraph}
+                                      {val.content[value.paragraph_index]}
                                     </Title>
                                   </Panel>
                                 </Collapse>
@@ -87,8 +81,9 @@ function TimeLine(props) {
                           );
                         })}
                       </>
+                      <div><a href={val.url}>[{val.source}原文]</a></div>
                     </Panel>
-                  </Collapse> */} 
+                  </Collapse>
                 </TimelineContent>
               </TimelineItem>
             );

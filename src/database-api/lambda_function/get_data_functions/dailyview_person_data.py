@@ -16,15 +16,4 @@ def get_name_party_title_category_imageurl_rank(category:str=None)->dict:
     
     rows = psycopg_methods.execute_sql(sql)
 
-    result = [
-        {
-            "name": row[0],
-            "party": row[1],
-            "title": row[2],
-            "dailyview_category": row[3],
-            "dailyview_image_url": row[4],
-            "dailyview_rank": row[5]
-        } for row in rows
-    ]
-
-    return result
+    return rows

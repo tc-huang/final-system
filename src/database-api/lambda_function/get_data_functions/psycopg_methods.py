@@ -1,5 +1,6 @@
 import configparser
 import psycopg
+from psycopg.rows import dict_row
 import pathlib
 
 
@@ -22,7 +23,7 @@ def execute_sql(sql:str, data_tuple:tuple=None)->list[tuple]:
     conninfo = get_conninfo()
     
     with psycopg.connect(conninfo) as conn:
-        with conn.cursor() as cur:
+        with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, data_tuple)
             conn.commit()
             rows = cur.fetchall()
