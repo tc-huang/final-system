@@ -5,8 +5,20 @@ name = "pypi"
 
 [packages]
 psycopg = {extras = ["binary"], version = "*"}
+spacy = "*"
+spacy-stanza = "*"
+pandas = "*"
+ckip-transformers = "*"
+tqdm = "*"
+sentence-transformers = "*"
+ipywidgets = "*"
+scikit-learn = "*"
+matplotlib = "*"
+seaborn = "*"
+label-studio = "*"
 
 [dev-packages]
+ipykernel = "*"
 
 [requires]
 python_version = "3.9"
