@@ -1,0 +1,21 @@
+<View>
+    <Header value="$title" />
+    
+    <ParagraphLabels name="opinion_label" toName="paragraphs">
+      <Label value="OPINION_SRC" background="blue" />
+      <Label value="OPINION_OPR" background="red" />
+      <Label value="OPINION_SEG" background="orange" />
+      <Label value="Pronoun"  background="green" />
+      <Label value="Coreference" background="yellow" />
+    </ParagraphLabels>
+    
+    <Paragraphs name="paragraphs" value="$paragraphs" layout="dialogue" nameKey="author" textKey="text"/>
+	
+  	<Relations>
+      <Relation value="OPR->SRC" />
+      <Relation value="OPR->SEG" />
+      <Relation value="Pronoun->Coreference" />
+  	</Relations>
+    
+  	<TextArea name="notes" toName="paragraphs" editable="true" />
+</View>

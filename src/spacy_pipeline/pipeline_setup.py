@@ -38,3 +38,7 @@ def get_pipeline():
     analysis = spacy_pipeline.analyze_pipes(pretty=True)
     print(analysis)
     return spacy_pipeline
+
+def get_vocab():
+    spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', use_gpu=has_gpu)
+    return spacy_pipeline.vocab
