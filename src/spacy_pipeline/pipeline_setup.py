@@ -1,7 +1,9 @@
 from spacy.tokens import Token, Span, Doc
 import spacy_stanza
 import torch
+
 from .ckip import ckip_ner, ckip_pos
+from .opinion_rule import opinion_matcher
 
 has_gpu = True if torch.cuda.is_available() else False
 
@@ -33,6 +35,21 @@ def get_pipeline():
     spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', use_gpu=has_gpu)
     spacy_pipeline.add_pipe('ckip_pos', last=True)
     spacy_pipeline.add_pipe('ckip_ner', last=True)
+    spacy_pipeline.set_error_handler(error_handler)
+    print(spacy_pipeline.pipe_names)
+    analysis = spacy_pipeline.analyze_pipes(pretty=True)
+    print(analysis)
+    return spacy_pipeline
+
+def get_opinion_pipeline(rule_version_and_pattenrn:dict):
+    set_all_extensions()
+    spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', use_gpu=has_gpu)
+    spacy_pipeline.add_pipe("opinion_matcher",
+                        config={
+                            "version": rule_version_and_pattenrn["version"],
+                            "pattern":rule_version_and_pattenrn["pattern"]
+                            },
+                        last=True)
     spacy_pipeline.set_error_handler(error_handler)
     print(spacy_pipeline.pipe_names)
     analysis = spacy_pipeline.analyze_pipes(pretty=True)
