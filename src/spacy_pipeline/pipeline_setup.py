@@ -56,6 +56,12 @@ def get_opinion_pipeline(rule_version_and_pattenrn:dict):
     print(analysis)
     return spacy_pipeline
 
+def get_coreference_pipeline():
+    pass
+    # spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', use_gpu=has_gpu)
+    # spacy_pipeline.add_pipe("pronounce_matcher_label", config={"target_spangroup_key": "opinion_label", "target_span_label": "OPINION_SRC", "new_spangroup_key": "pronounce_in_label"}, last=True)
+    # spacy_pipeline.add_pipe("pronounce_matcher_found", config={"target_spangroup_key": "opinion_found", "target_span_label": "OPINION_SRC_match", "new_spangroup_key": "pronounce_in_found"}, last=True)
+
 def get_vocab():
     spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', use_gpu=has_gpu)
     return spacy_pipeline.vocab

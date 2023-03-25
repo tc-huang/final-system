@@ -3,6 +3,42 @@ from spacy.language import Language
 from spacy.matcher import DependencyMatcher
 from spacy.tokens import Span, SpanGroup
 
+methods = {
+    "opinion_v0": {
+        "version": "opinion_v0",
+        "pattern": [
+            {
+                "RIGHT_ID": "OPINION_OPR_found_root",
+                "RIGHT_ATTRS": {
+                    "TAG": {
+                        "IN": ["VE"]
+                    }
+                }
+            },
+            {
+                "LEFT_ID": "OPINION_OPR_found_root",
+                "REL_OP": ">",
+                "RIGHT_ID": "OPINION_SRC_found_root",
+                "RIGHT_ATTRS": {
+                    "DEP": {
+                        "IN": ["nsubj"]
+                    }
+                }
+            },
+            {
+                "LEFT_ID": "OPINION_OPR_found_root",
+                "REL_OP": ">",
+                "RIGHT_ID": "OPINION_SEG_found_root",
+                "RIGHT_ATTRS": {
+                    "DEP": {
+                        "IN": ["ccomp"]
+                    },
+                }
+            }
+        ]
+    },
+}
+
 @Language.factory("opinion_matcher")
 def opinion_matcher(nlp, name, version, pattern):
     def on_match(matcher, doc, id, matches):
