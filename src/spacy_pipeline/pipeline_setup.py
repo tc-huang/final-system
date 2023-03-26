@@ -11,6 +11,7 @@ def set_all_extensions():
     Token.set_extension('label_id', default=[], force=True)
     Token.set_extension('label_type', default=[], force=True)
     Token.set_extension('relation_label', default=[], force=True)
+    Token.set_extension('found_type', default=None, force=True)
 
     Span.set_extension('label_id', default=[], force=True)
     Span.set_extension('label_type', default=[], force=True)

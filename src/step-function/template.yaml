@@ -1,0 +1,196 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  state-function
+
+  Sample SAM Template for state-function
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 900
+
+Resources:
+  OpinionProcessStateMachine:
+    Type: AWS::Serverless::StateMachine # More info about State Machine Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-statemachine.html
+    Properties:
+      DefinitionUri: statemachine/statemachine_config.asl.json
+      DefinitionSubstitutions:
+        # NewsDataToGraphFunctionArn: !GetAtt NewsDataToGraphFunction.Arn
+        # OpinionProcessFunctionArn: !GetAtt OpinionProcessFunction.Arn
+        # ConnectToPersonFunctionArn: !GetAtt ConnectToPersonFunction.Arn
+        SelectNewsDataFromDBFunctionArn : !GetAtt SelectNewsDataFromDBFunction.Arn
+        StanzaCKIPPipelineFunctionArn: !GetAtt StanzaCKIPPipelineFunction.Arn 
+        OpinionExtractionFunctionArn: !GetAtt OpinionExtractionFunction.Arn
+        SbertEmbeddingFunctionArn: !GetAtt SbertEmbeddingFunction.Arn
+        TopicClusteringFunctionArn: !GetAtt TopicClusteringFunction.Arn
+      Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SelectNewsDataFromDBFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref StanzaCKIPPipelineFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref OpinionExtractionFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SbertEmbeddingFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref TopicClusteringFunction 
+      # Events:
+
+      #   HourlyChinaTimes:
+      #     Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
+      #     Properties:
+      #       Description: Schedule to run the opinion extraction state machine every hour.
+      #       Schedule: cron(0 * ? * * *)
+      #       Input: "{\"media\":\"中時新聞網\", \"hour_past\":2}"
+      #       Enabled: True
+      #   HourlyCNA:
+      #     Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
+      #     Properties:
+      #       Description: Schedule to run the opinion extraction state machine every hour.
+      #       Schedule: cron(0 * ? * * *)
+      #       Input: "{\"media\":\"中央社\", \"hour_past\":2}"
+      #       Enabled: True
+      #   HourlyETToday:
+      #     Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
+      #     Properties:
+      #       Description: Schedule to run the opinion extraction state machine every hour.
+      #       Schedule: cron(0 * ? * * *)
+      #       Input: "{\"media\":\"東森新聞雲\", \"hour_past\":2}"
+      #       Enabled: True
+      #   HourlyLTN:
+      #     Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
+      #     Properties:
+      #       Description: Schedule to run the opinion extraction state machine every hour.
+      #       Schedule: cron(0 * ? * * *)
+      #       Input: "{\"media\":\"自由時報\", \"hour_past\":2}"
+      #       Enabled: True
+      #   HourlySETN:
+      #     Type: Schedule # More info about Schedule Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-statemachine-schedule.html
+      #     Properties:
+      #       Description: Schedule to run the opinion extraction state machine every hour.
+      #       Schedule: cron(0 * ? * * *)
+      #       Input: "{\"media\":\"三立新聞網\", \"hour_past\":2}"
+      #       Enabled: True
+      # Policies: # Find out more about SAM policy templates: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-templates.html
+      #   - LambdaInvokePolicy:
+      #       FunctionName: !Ref NewsDataToGraphFunction
+      #   - LambdaInvokePolicy:
+      #       FunctionName: !Ref OpinionProcessFunction
+      #   - LambdaInvokePolicy:
+      #       FunctionName: !Ref ConnectToPersonFunction
+
+   
+  SelectNewsDataFromDBFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      MemorySize: 2048
+      EphemeralStorage:
+        Size: 2048
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./lambda_functions/select_news_data_from_db
+      DockerTag: python3.9-v1
+
+  StanzaCKIPPipelineFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      MemorySize: 2048
+      EphemeralStorage:
+        Size: 2048
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./lambda_functions/stanza_and_ckip_pipeline
+      DockerTag: python3.9-v1
+
+  OpinionExtractionFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      MemorySize: 2048
+      EphemeralStorage:
+        Size: 2048
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./lambda_functions/opinion_extraction
+      DockerTag: python3.9-v1
+
+  SbertEmbeddingFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      PackageType: Image
+      Architectures:
+        - x86_64
+      MemorySize: 2048
+      EphemeralStorage:
+        Size: 2048
+    Metadata:
+      Dockerfile: Dockerfile
+      DockerContext: ./lambda_functions/sbert_embedding
+      DockerTag: python3.9-v1
+
+  TopicClusteringFunction:
+      Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+      Properties:
+        PackageType: Image
+        Architectures:
+          - x86_64
+        MemorySize: 2048
+        EphemeralStorage:
+          Size: 2048
+      Metadata:
+        Dockerfile: Dockerfile
+        DockerContext: ./lambda_functions/topic_clustering
+        DockerTag: python3.9-v1
+
+
+
+
+  # NewsDataToGraphFunction:
+  #   Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+  #   Properties:
+  #     PackageType: Image
+  #     Architectures:
+  #       - x86_64
+  #     MemorySize: 2048
+  #     EphemeralStorage:
+  #       Size: 2048
+  #   Metadata:
+  #     Dockerfile: Dockerfile
+  #     DockerContext: ./functions/graph_process/news_data_to_graph
+  #     DockerTag: python3.9-v1
+
+  # OpinionProcessFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     PackageType: Image
+  #     Architectures:
+  #       - x86_64
+  #     MemorySize: 2048
+  #     EphemeralStorage:
+  #       Size: 10240
+  #   Metadata:
+  #     Dockerfile: Dockerfile
+  #     DockerContext: ./functions/graph_process/opinion_process
+  #     DockerTag: python3.9-v1
+
+  # ConnectToPersonFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     PackageType: Image
+  #     Architectures:
+  #       - x86_64
+  #     MemorySize: 2048
+  #     EphemeralStorage:
+  #       Size: 2048
+  #   Metadata:
+  #     Dockerfile: Dockerfile
+  #     DockerContext: ./functions/graph_process/connect_to_person
+  #     DockerTag: python3.9-v1

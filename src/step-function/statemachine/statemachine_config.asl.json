@@ -1,0 +1,134 @@
+{
+    "Comment": "A description of my state machine",
+    "StartAt": "select_news_data_from_db",
+    "States": {
+      "select_news_data_from_db": {
+        "Type": "Task",
+        "Resource": "${SelectNewsDataFromDBFunctionArn}",
+        "InputPath": "$.date",
+        "Retry": [
+          {
+            "ErrorEquals": [
+              "Lambda.ServiceException",
+              "Lambda.AWSLambdaException",
+              "Lambda.SdkClientException",
+              "Lambda.TooManyRequestsException"
+            ],
+            "IntervalSeconds": 2,
+            "MaxAttempts": 6,
+            "BackoffRate": 2
+          }
+        ],
+        "Next": "Parallel"
+      },
+      "Parallel": {
+        "Type": "Parallel",
+        "Branches": [
+          {
+            "StartAt": "map_each_news",
+            "States": {
+              "map_each_news": {
+                "Type": "Map",
+                "ItemsPath": "$.news_docs_bytes_list",
+                "MaxConcurrency": 1,
+                "Iterator": {
+                  "StartAt": "stanza_and_ckip_pipeline",
+                  "States": {
+                    "stanza_and_ckip_pipeline": {
+                      "Type": "Task",
+                      "Resource": "${StanzaCKIPPipelineFunctionArn}",
+                      "Retry": [
+                        {
+                          "ErrorEquals": [
+                            "Lambda.ServiceException",
+                            "Lambda.AWSLambdaException",
+                            "Lambda.SdkClientException",
+                            "Lambda.TooManyRequestsException"
+                          ],
+                          "IntervalSeconds": 2,
+                          "MaxAttempts": 6,
+                          "BackoffRate": 2
+                        }
+                      ],
+                      "Next": "opinion_extraction"
+                    },
+                    "opinion_extraction": {
+                      "Type": "Task",
+                      "InputPath": "$.stanza_and_ckip_pipeline_output",
+                      "Resource": "${OpinionExtractionFunctionArn}",
+                      "Retry": [
+                        {
+                          "ErrorEquals": [
+                            "Lambda.ServiceException",
+                            "Lambda.AWSLambdaException",
+                            "Lambda.SdkClientException",
+                            "Lambda.TooManyRequestsException"
+                          ],
+                          "IntervalSeconds": 2,
+                          "MaxAttempts": 6,
+                          "BackoffRate": 2
+                        }
+                      ],
+                      "End": true
+                    }
+                  }
+                },
+                "Next": "success_opinion_extraction"
+              },
+              "success_opinion_extraction": {
+                "Type": "Succeed"
+              }
+            }
+          },
+          {
+            "StartAt": "sbert_embedding",
+            "States": {
+              "sbert_embedding": {
+                "Type": "Task",
+                "Resource": "${SbertEmbeddingFunctionArn}",
+                "Retry": [
+                  {
+                    "ErrorEquals": [
+                      "Lambda.ServiceException",
+                      "Lambda.AWSLambdaException",
+                      "Lambda.SdkClientException",
+                      "Lambda.TooManyRequestsException"
+                    ],
+                    "IntervalSeconds": 2,
+                    "MaxAttempts": 6,
+                    "BackoffRate": 2
+                  }
+                ],
+                "Next": "topic_clustering"
+              },
+              "topic_clustering": {
+                "Type": "Task",
+                "Resource": "${TopicClusteringFunctionArn}",
+                "Retry": [
+                  {
+                    "ErrorEquals": [
+                      "Lambda.ServiceException",
+                      "Lambda.AWSLambdaException",
+                      "Lambda.SdkClientException",
+                      "Lambda.TooManyRequestsException"
+                    ],
+                    "IntervalSeconds": 2,
+                    "MaxAttempts": 6,
+                    "BackoffRate": 2
+                  }
+                ],
+                "Next": "Success_clustering"
+              },
+              "Success_clustering": {
+                "Type": "Succeed"
+              }
+            }
+          }
+        ],
+        "Next": "Success_all"
+      },
+      "Success_all": {
+        "Type": "Succeed"
+      }
+    }
+  }

@@ -59,9 +59,16 @@ def opinion_matcher(nlp, name, version, pattern):
             OPINION_SRC_subtree_tokens = [token for token in OPINION_SRC_root_token.subtree]
             OPINION_SEG_subtree_tokens = [token for token in OPINION_SEG_root_token.subtree]
 
-            OPINION_SRC_span = Span(doc, OPINION_SRC_subtree_tokens[0].i, OPINION_SRC_subtree_tokens[-1].i + 1, label="OPINION_SRC_match")
-            OPINION_SEG_span = Span(doc, OPINION_SEG_subtree_tokens[0].i, OPINION_SEG_subtree_tokens[-1].i + 1, label="OPINION_SEG_match")
-            OPINION_OPR_span = Span(doc, match_token_id_list[0], match_token_id_list[0] + 1, label="OPINION_OPR_match")
+            OPINION_SRC_span = Span(doc, OPINION_SRC_subtree_tokens[0].i, OPINION_SRC_subtree_tokens[-1].i + 1, label="OPINION_SRC_found")
+            OPINION_SEG_span = Span(doc, OPINION_SEG_subtree_tokens[0].i, OPINION_SEG_subtree_tokens[-1].i + 1, label="OPINION_SEG_found")
+            OPINION_OPR_span = Span(doc, match_token_id_list[0], match_token_id_list[0] + 1, label="OPINION_OPR_found")
+
+            for token in OPINION_SRC_span:
+                token._.found_type = "OPINION_SRC_found"
+            for token in OPINION_SEG_span:
+                token._.found_type = "OPINION_SEG_found"
+            for token in OPINION_OPR_span:
+                token._.found_type = "OPINION_OPR_found"
 
             opinion_spangroup.append([OPINION_SRC_span, OPINION_OPR_span, OPINION_SEG_span])
 

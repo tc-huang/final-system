@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "step-function"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-10k1sggy6skj3"
+s3_prefix = "step-function"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = ["SelectNewsDataFromDBFunction=718000052173.dkr.ecr.us-east-1.amazonaws.com/stepfunction224a153c/selectnewsdatafromdbfunction64725b14repo", "StanzaCKIPPipelineFunction=718000052173.dkr.ecr.us-east-1.amazonaws.com/stepfunction224a153c/stanzackippipelinefunction168eed1frepo", "OpinionExtractionFunction=718000052173.dkr.ecr.us-east-1.amazonaws.com/stepfunction224a153c/opinionextractionfunction6561052frepo", "SbertEmbeddingFunction=718000052173.dkr.ecr.us-east-1.amazonaws.com/stepfunction224a153c/sbertembeddingfunctionf6341d33repo", "TopicClusteringFunction=718000052173.dkr.ecr.us-east-1.amazonaws.com/stepfunction224a153c/topicclusteringfunction19ea367frepo"]
