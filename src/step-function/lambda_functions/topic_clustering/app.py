@@ -1,5 +1,5 @@
-from datetime import datetime
-from psycopg_methods import exec_sql
+from datetime import datetime, timedelta
+import psycopg_methods
 import pathlib
 import configparser
 from sklearn.cluster import AgglomerativeClustering
@@ -21,7 +21,7 @@ def get_newsuid_vector_tuple_a_date(from_date_include, to_date_include):
         SELECT news_uid, sbert_embedding FROM {SBERT_EMBEDDING_TABLE_NAME}
         WHERE '{from_date_include}' <= time AND time <= '{to_date_include}';
         """
-    result = exec_sql(sql)
+    result = psycopg_methods.execute_sql(sql)
 
     news_uid_list = [i[0] for i in result]
     sbert_embedding_list = [pickle.loads(i[1]) for i in result]
@@ -43,7 +43,7 @@ def cluster_result_to_db(news_uid_list, cluster_assignment, cluster_time:datetim
         SET TIME ZONE 'Asia/Taipei';
         """
     
-    exec_sql(sql)
+    psycopg_methods.execute_sql(sql, not_fetch=True)
     
     cluster_result = {}
     for news_uid, cluster_id in zip(news_uid_list, cluster_assignment):
@@ -59,7 +59,7 @@ def cluster_result_to_db(news_uid_list, cluster_assignment, cluster_time:datetim
             INSERT INTO {CLUSTERING_TABLE_NAME} (cluster_time, cluster_id, news_uid_in_cluster) VALUES (%s, %s, %s);
             """
 
-        exec_sql(sql, (cluster_time, cluster_id, cluster_result[cluster_id]))
+        psycopg_methods.execute_sql(sql, (cluster_time, cluster_id, cluster_result[cluster_id]), not_fetch=True)
 
 
 def lambda_handler(event, context):
@@ -83,13 +83,20 @@ def lambda_handler(event, context):
     """
 
     date = event
-    to_date_include = datetime.datetime.strptime(date, '%Y-%m-%d')
-    from_date_include = to_date_include - datetime.timedelta(days=7)
+    to_date_include = datetime.strptime(date, '%Y-%m-%d')
+    from_date_include = to_date_include - timedelta(days=7)
     from_date_include_str = str(from_date_include.date())
     to_date_include_str = str(to_date_include.date())
 
     news_uid_list, sbert_embedding_list = get_newsuid_vector_tuple_a_date(from_date_include_str, to_date_include_str)
-    clustering = AgglomerativeClustering(n_clusters=10).fit(sbert_embedding_list)
+    clustering = AgglomerativeClustering(
+        distance_threshold=0.78,
+        n_clusters=None,
+        metric="euclidean",
+        linkage="ward",
+        compute_distances=False,
+        compute_full_tree=True,
+    ).fit(sbert_embedding_list)
     cluster_assignment = clustering.labels_
     cluster_result_to_db(news_uid_list, cluster_assignment, to_date_include) 
 

@@ -102,7 +102,7 @@ Resources:
         - x86_64
       MemorySize: 2048
       EphemeralStorage:
-        Size: 2048
+        Size: 10240
     Metadata:
       Dockerfile: Dockerfile
       DockerContext: ./lambda_functions/stanza_and_ckip_pipeline
@@ -116,7 +116,7 @@ Resources:
         - x86_64
       MemorySize: 2048
       EphemeralStorage:
-        Size: 2048
+        Size: 10240
     Metadata:
       Dockerfile: Dockerfile
       DockerContext: ./lambda_functions/opinion_extraction
@@ -130,7 +130,7 @@ Resources:
         - x86_64
       MemorySize: 2048
       EphemeralStorage:
-        Size: 2048
+        Size: 10240
     Metadata:
       Dockerfile: Dockerfile
       DockerContext: ./lambda_functions/sbert_embedding
@@ -144,7 +144,7 @@ Resources:
           - x86_64
         MemorySize: 2048
         EphemeralStorage:
-          Size: 2048
+          Size: 10240
       Metadata:
         Dockerfile: Dockerfile
         DockerContext: ./lambda_functions/topic_clustering

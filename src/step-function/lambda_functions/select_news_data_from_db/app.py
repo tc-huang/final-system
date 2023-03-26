@@ -18,7 +18,8 @@ def get_title_content_uid_tuple_a_date(from_date_include, to_date_exclude):
     
     sql = f"""
         SELECT time, title, content, uid FROM {SELECT_NEWS_DATA_TABLE_NAME}
-        WHERE '{from_date_include}' <= time AND time < '{to_date_exclude}';
+        WHERE '{from_date_include}' <= time AND time < '{to_date_exclude}'
+        LIMIT 10;
         """
     
     rows = psycopg_methods.execute_sql(sql)
@@ -57,13 +58,9 @@ def lambda_handler(event, context):
 
     transaction_result = {
         "select_news_data_from_db": datetime.now().isoformat(),  # Timestamp of the when the transaction was completed
-        "news_docs_bytes_list": json.dumps(
-            get_title_content_uid_tuple_a_date(input_date_str, date_add_str),
-            ensure_ascii=False,
-            indent=4,
-            default=str
-        )
+        "input_date": input_date_str,
+        "date_add": date_add_str,
+        "news_docs_bytes_list": json.loads(json.dumps(get_title_content_uid_tuple_a_date(input_date_str, date_add_str), ensure_ascii=False, default=str))
     }
-
 
     return transaction_result

@@ -18,16 +18,19 @@ def get_conninfo()->str:
     conninfo = f"host={DB_INSTANCE_ENDPOINT} dbname={DB_NAME} port={PORT} user={MASTER_USER_NAME} password={PASSWORD}"
     return conninfo
 
-def execute_sql(sql:str, data_tuple:tuple=None)->list[tuple]:
+def execute_sql(sql:str, data_tuple:tuple=None, not_fetch=False)->list[tuple]:
     # try:
     conninfo = get_conninfo()
-    
+    print(conninfo)
     with psycopg.connect(conninfo) as conn:
         with conn.cursor(row_factory=dict_row) as cur:
             cur.execute(sql, data_tuple)
             conn.commit()
-            rows = cur.fetchall()
-            return rows
+            if not_fetch:
+                return None
+            else:
+                rows = cur.fetchall()
+                return rows
     
     # except:
     #     return None

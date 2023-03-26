@@ -1,8 +1,9 @@
 from spacy.tokens import Token, Span, Doc
 import spacy_stanza
 import torch
+import stanza
 
-from .ckip import ckip_ner, ckip_pos
+from .ckip import ckip_ner, ckip_pos, ckip_ner_aws, ckip_pos_aws
 from .opinion_rule import opinion_matcher
 
 has_gpu = True if torch.cuda.is_available() else False
@@ -66,3 +67,57 @@ def get_coreference_pipeline():
 def get_vocab():
     spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', use_gpu=has_gpu)
     return spacy_pipeline.vocab
+
+def get_aws_pipeline():
+    rule_version_and_pattern = {
+        "version": "opinion_v0",
+        "pattern": [
+            {
+                "RIGHT_ID": "OPINION_OPR_found_root",
+                "RIGHT_ATTRS": {
+                    "TAG": {
+                        "IN": ["VE"]
+                    },
+                }
+            },
+            {
+                "LEFT_ID": "OPINION_OPR_found_root",
+                "REL_OP": ">",
+                "RIGHT_ID": "OPINION_SRC_found_root",
+                "RIGHT_ATTRS": {
+                    "DEP": {
+                        "IN": ["nsubj"]
+                    },
+                }
+            },
+            {
+                "LEFT_ID": "OPINION_OPR_found_root",
+                "REL_OP": ">",
+                "RIGHT_ID": "OPINION_SEG_found_root",
+                "RIGHT_ATTRS": {
+                    "DEP": {
+                        "IN": ["ccomp", "parataxis"]
+                    },
+                    "POS": {
+                            "IN": ["VERB", "NOUN", "ADJ"]
+                    }
+                }
+            }
+        ]
+    }
+    stanza.download(lang='zh-hant', model_dir='/tmp/stanza_resources')
+    set_all_extensions()
+    spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', dir='/tmp/stanza_resources', download_method=None, use_gpu=has_gpu)
+    spacy_pipeline.add_pipe('ckip_pos_aws', last=True)
+    spacy_pipeline.add_pipe('ckip_ner_aws', last=True)
+    spacy_pipeline.add_pipe("opinion_matcher",
+                        config={
+                            "version": rule_version_and_pattern["version"],
+                            "pattern":rule_version_and_pattern["pattern"]
+                            },
+                        last=True)
+    spacy_pipeline.set_error_handler(error_handler)
+    print(spacy_pipeline.pipe_names)
+    analysis = spacy_pipeline.analyze_pipes(pretty=True)
+    print(analysis)
+    return spacy_pipeline
