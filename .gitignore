@@ -128,4 +128,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-src/database-api/lambda_function/get_data_functions/config.cfg
+config.cfg
