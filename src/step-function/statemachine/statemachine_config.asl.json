@@ -85,6 +85,7 @@
             "States": {
               "sbert_embedding": {
                 "Type": "Task",
+                "InputPath": "$.news_docs_bytes_list",
                 "Resource": "${SbertEmbeddingFunctionArn}",
                 "Retry": [
                   {
