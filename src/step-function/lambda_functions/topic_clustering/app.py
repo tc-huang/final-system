@@ -6,7 +6,7 @@ from sklearn.cluster import AgglomerativeClustering
 import pickle
 
 
-def get_newsuid_vector_tuple_a_date(from_date_include, to_date_include):
+def get_newsuid_vector_tuple_a_date(from_date_include, to_date_exclude):
 # date like '2023-01-01'
     # sql = f"""
     #     SELECT time, title, content, uid FROM news_data_select
@@ -18,13 +18,13 @@ def get_newsuid_vector_tuple_a_date(from_date_include, to_date_include):
     
     SBERT_EMBEDDING_TABLE_NAME = config['PostgreSQL']['SBERT_EMBEDDING_TABLE_NAME'] 
     sql = f"""
-        SELECT news_uid, sbert_embedding FROM {SBERT_EMBEDDING_TABLE_NAME}
-        WHERE '{from_date_include}' <= time AND time <= '{to_date_include}';
+        SELECT * FROM public.{SBERT_EMBEDDING_TABLE_NAME}
+        WHERE '{from_date_include}' <= time AND time < '{to_date_exclude}';
         """
     result = psycopg_methods.execute_sql(sql)
 
-    news_uid_list = [i[0] for i in result]
-    sbert_embedding_list = [pickle.loads(i[1]) for i in result]
+    news_uid_list = [i['news_uid'] for i in result]
+    sbert_embedding_list = [pickle.loads(i['sbert_embedding']).numpy() for i in result]
     return news_uid_list, sbert_embedding_list
 
 def cluster_result_to_db(news_uid_list, cluster_assignment, cluster_time:datetime):
@@ -83,12 +83,16 @@ def lambda_handler(event, context):
     """
 
     date = event
-    to_date_include = datetime.strptime(date, '%Y-%m-%d')
-    from_date_include = to_date_include - timedelta(days=7)
-    from_date_include_str = str(from_date_include.date())
-    to_date_include_str = str(to_date_include.date())
+    to_date_exclude = datetime.strptime(date, '%Y-%m-%d') + timedelta(days=1)
+    from_date_include = to_date_exclude - timedelta(days=8)
+    from_date_include_str = from_date_include.strftime('%Y-%m-%d')
+    to_date_include_str = to_date_exclude.strftime('%Y-%m-%d')
+
+    print(from_date_include, to_date_exclude)
+
 
     news_uid_list, sbert_embedding_list = get_newsuid_vector_tuple_a_date(from_date_include_str, to_date_include_str)
+    print(sbert_embedding_list)
     clustering = AgglomerativeClustering(
         distance_threshold=0.78,
         n_clusters=None,
@@ -98,7 +102,7 @@ def lambda_handler(event, context):
         compute_full_tree=True,
     ).fit(sbert_embedding_list)
     cluster_assignment = clustering.labels_
-    cluster_result_to_db(news_uid_list, cluster_assignment, to_date_include) 
+    cluster_result_to_db(news_uid_list, cluster_assignment, to_date_include_str) 
 
     transaction_result = {
         "topic_clustering": datetime.now().isoformat(),  # Timestamp of the when the transaction was completed
@@ -106,3 +110,7 @@ def lambda_handler(event, context):
 
 
     return transaction_result
+
+if __name__ == '__main__':
+    transaction_result = lambda_handler(event='2023-01-05', context=None)
+    print(transaction_result)
