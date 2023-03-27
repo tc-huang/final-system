@@ -191,7 +191,7 @@ export default function TodaysNews(props) {
 
   return (
     <>
-      <Divider orientation="left">請選擇瀏覽方式</Divider>
+      <Divider orientation="left">請選擇瀏覽日期</Divider>
 
       <Menu
         mode="horizontal"
@@ -200,7 +200,7 @@ export default function TodaysNews(props) {
         selectedKeys={[current]}
       >
         <DatePicker onChange={onChange} />
-        <Menu.SubMenu
+        {/* <Menu.SubMenu
           key="timeline"
           title="瀏覽日期"
           icon={<FileOutlined />}
@@ -210,7 +210,7 @@ export default function TodaysNews(props) {
           key="timeline"
           title="依照「時間軸」呈現"
           icon={<FileOutlined />}
-        >
+        > */}
           {/* <Menu.Item key="timeline_today" icon={<FileOutlined />}>
                         「今日」標題時間軸
                     </Menu.Item>
@@ -220,12 +220,12 @@ export default function TodaysNews(props) {
                     <Menu.Item key="timeline_before_yesterday" icon={<FileOutlined />}>
                         「前天」標題時間軸
                     </Menu.Item> */}
-        </Menu.SubMenu>
-        <Menu.SubMenu
+        {/* </Menu.SubMenu> */}
+        {/* <Menu.SubMenu
           key="common_person_cluster"
           title="依照「共同人物分群結果」呈現"
           icon={<FileOutlined />}
-        >
+        > */}
           {/* <Menu.Item key="common_person_cluster_all" icon={<FileOutlined />}>
                         「全部」共同人物分群
                     </Menu.Item>
@@ -244,11 +244,11 @@ export default function TodaysNews(props) {
                     >
                         「前天」共同人物分群
                     </Menu.Item> */}
-        </Menu.SubMenu>
+        {/* </Menu.SubMenu> */}
       </Menu>
-      <Divider orientation="left">
+      {/* <Divider orientation="left">
         {date}({current})
-      </Divider>
+      </Divider> */}
       <ShowContent date={date} show_type={current} />
     </>
   );

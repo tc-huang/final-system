@@ -130,3 +130,4 @@ dmypy.json
 
 *.cfg
 src/step-function/lambda_functions/stanza_and_ckip_pipeline/download_models
+src/step-function/lambda_functions/sbert_embedding/sbert_model

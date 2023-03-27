@@ -1,116 +1,155 @@
 {
-    "Comment": "A description of my state machine",
-    "StartAt": "select_news_data_from_db",
-    "States": {
-      "select_news_data_from_db": {
-        "Type": "Task",
-        "Resource": "${SelectNewsDataFromDBFunctionArn}",
-        "InputPath": "$.date",
-        "Retry": [
-          {
-            "ErrorEquals": [
-              "Lambda.ServiceException",
-              "Lambda.AWSLambdaException",
-              "Lambda.SdkClientException",
-              "Lambda.TooManyRequestsException"
-            ],
-            "IntervalSeconds": 2,
-            "MaxAttempts": 6,
-            "BackoffRate": 2
-          }
-        ],
-        "Next": "Parallel"
-      },
-      "Parallel": {
-        "Type": "Parallel",
-        "Branches": [
-          {
-            "StartAt": "map_each_news",
-            "States": {
-              "map_each_news": {
-                "Type": "Map",
-                "ItemsPath": "$.news_docs_bytes_list",
-                "MaxConcurrency": 1,
-                "Iterator": {
-                  "StartAt": "stanza_and_ckip_pipeline",
-                  "States": {
-                    "stanza_and_ckip_pipeline": {
-                      "Type": "Task",
-                      "Resource": "${StanzaCKIPPipelineFunctionArn}",
-                      "Retry": [
-                        {
-                          "ErrorEquals": [
-                            "Lambda.ServiceException",
-                            "Lambda.AWSLambdaException",
-                            "Lambda.SdkClientException",
-                            "Lambda.TooManyRequestsException"
-                          ],
-                          "IntervalSeconds": 2,
-                          "MaxAttempts": 6,
-                          "BackoffRate": 2
-                        }
-                      ],
-                      "End": true
-                    } 
-                  }
-                },
-                "Next": "success_opinion_extraction"
-              },
-              "success_opinion_extraction": {
-                "Type": "Succeed"
-              }
-            }
-          },
-          {
-            "StartAt": "sbert_embedding",
-            "States": {
-              "sbert_embedding": {
-                "Type": "Task",
-                "InputPath": "$.news_docs_bytes_list",
-                "Resource": "${SbertEmbeddingFunctionArn}",
-                "Retry": [
-                  {
-                    "ErrorEquals": [
-                      "Lambda.ServiceException",
-                      "Lambda.AWSLambdaException",
-                      "Lambda.SdkClientException",
-                      "Lambda.TooManyRequestsException"
+  "Comment": "A description of my state machine",
+  "StartAt": "select_news_data_from_db",
+  "States": {
+    "select_news_data_from_db": {
+      "Type": "Task",
+      "Resource": "${SelectNewsDataFromDBFunctionArn}",
+      "InputPath": "$.date",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 6,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Parallel"
+    },
+    "Parallel": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "map_each_news",
+          "States": {
+            "map_each_news": {
+              "Type": "Map",
+              "ItemsPath": "$.news_docs_bytes_list",
+              "MaxConcurrency": 10,
+              "Iterator": {
+                "StartAt": "stanza_and_ckip_pipeline",
+                "States": {
+                  "stanza_and_ckip_pipeline": {
+                    "Type": "Task",
+                    "Resource": "${StanzaCKIPPipelineFunctionArn}",
+                    "Retry": [
+                      {
+                        "ErrorEquals": [
+                          "Lambda.ServiceException",
+                          "Lambda.AWSLambdaException",
+                          "Lambda.SdkClientException",
+                          "Lambda.TooManyRequestsException"
+                        ],
+                        "IntervalSeconds": 2,
+                        "MaxAttempts": 6,
+                        "BackoffRate": 2
+                      }
                     ],
-                    "IntervalSeconds": 2,
-                    "MaxAttempts": 6,
-                    "BackoffRate": 2
+                    "End": true,
+                    "Catch": [
+                      {
+                        "ErrorEquals": [
+                          "States.ALL"
+                        ],
+                        "Next": "ProcessingFailed2"
+                      }
+                    ]
+                  },
+                  "ProcessingFailed2": {
+                    "Type": "Pass",
+                    "Result": {
+                      "success": false
+                    },
+                    "End": true
                   }
-                ],
-                "Next": "topic_clustering"
+                }
               },
-              "topic_clustering": {
-                "Type": "Task",
-                "Resource": "${TopicClusteringFunctionArn}",
-                "Retry": [
-                  {
-                    "ErrorEquals": [
-                      "Lambda.ServiceException",
-                      "Lambda.AWSLambdaException",
-                      "Lambda.SdkClientException",
-                      "Lambda.TooManyRequestsException"
-                    ],
-                    "IntervalSeconds": 2,
-                    "MaxAttempts": 6,
-                    "BackoffRate": 2
-                  }
-                ],
-                "Next": "Success_clustering"
-              },
-              "Success_clustering": {
-                "Type": "Succeed"
-              }
+              "Next": "success_opinion_extraction"
+            },
+            "success_opinion_extraction": {
+              "Type": "Succeed"
             }
           }
-        ],
-        "Next": "Success_all"
-      },
-      "Success_all": {
-        "Type": "Succeed"
-      }
+        },
+        {
+          "StartAt": "sbert_embedding",
+          "States": {
+            "sbert_embedding": {
+              "Type": "Task",
+              "InputPath": "$.news_docs_bytes_list",
+              "Resource": "${SbertEmbeddingFunctionArn}",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "topic_clustering",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "Next": "ProcessingFailed1"
+                }
+              ]
+            },
+            "topic_clustering": {
+              "Type": "Task",
+              "InputPath": "$.date",
+              "Resource": "${TopicClusteringFunctionArn}",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 6,
+                  "BackoffRate": 2
+                }
+              ],
+              "Next": "Success_clustering",
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "Next": "ProcessingFailed1"
+                }
+              ]
+            },
+            "Success_clustering": {
+              "Type": "Succeed"
+            },
+            "ProcessingFailed1": {
+              "Type": "Pass",
+              "Result": {
+                "success": false
+              },
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "Success_all"
+    },
+    "Success_all": {
+      "Type": "Succeed"
     }
   }
+}

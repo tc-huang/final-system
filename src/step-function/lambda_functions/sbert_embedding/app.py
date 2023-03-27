@@ -18,13 +18,13 @@ def create_validate_content(content):
     return result_content
 
 def create_sbert_input(title, content):
-    # sbert_input = title + ''.join(content[:2])
-    sbert_input = content[0]
-    sbert_input.replace('\n', ' ')
+    sbert_input = title + ''.join(content[:2])
+    sbert_input.replace('\n', ' ').replace(' ','').replace(' ','')
     return sbert_input
 
 def create_sbert_embedding(sbert_input):
-    model = SentenceTransformer('distiluse-base-multilingual-cased-v1', cache_folder = '/tmp')
+    model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2', cache_folder = '/tmp')
+    # model = SentenceTransformer('/tmp/sbert_model', cache_folder = '/tmp/sbert_model') 
     emb = model.encode(sbert_input, convert_to_tensor=True)
     return emb
 
@@ -38,11 +38,10 @@ def news_uid_sbert_embedding_to_db(time, news_uid, sbert_embedding):
         CREATE TABLE if NOT EXISTS {SBERT_EMBEDDING_TABLE_NAME} (
             time timestamp,
             news_uid uuid,
-            sbert_embedding bytea,
-            primary key (news_uid)
+            sbert_embedding bytea
         );
         """
-    
+ 
     psycopg_methods.execute_sql(sql, not_fetch=True)
 
     tensor_bytes = pickle.dumps(sbert_embedding)
@@ -82,15 +81,18 @@ def lambda_handler(event, context):
 
     all_news = event
 
+    time = None
+
     for news in all_news:
 
         time = datetime.strptime(news['time'], '%Y-%m-%d %H:%M:%S')
-
         one_news_to_vector(time, news['title'], news['content'], news['uid'])
+
+    date = time.strftime('%Y-%m-%d')
 
     transaction_result = {
         "sbert_embedding": datetime.now().isoformat(),  # Timestamp of the when the transaction was completed
-        "date": "2023-01-05"
+        "date": date
     }
 
     return transaction_result

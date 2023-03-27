@@ -4,6 +4,7 @@ import pathlib
 import configparser
 from sklearn.cluster import AgglomerativeClustering
 import pickle
+import torch
 
 
 def get_newsuid_vector_tuple_a_date(from_date_include, to_date_exclude):
@@ -94,7 +95,7 @@ def lambda_handler(event, context):
     news_uid_list, sbert_embedding_list = get_newsuid_vector_tuple_a_date(from_date_include_str, to_date_include_str)
     print(sbert_embedding_list)
     clustering = AgglomerativeClustering(
-        distance_threshold=0.78,
+        distance_threshold=7.4954620343258025,
         n_clusters=None,
         metric="euclidean",
         linkage="ward",
