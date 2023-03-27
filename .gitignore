@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 *.cfg
+src/step-function/lambda_functions/stanza_and_ckip_pipeline/download_models

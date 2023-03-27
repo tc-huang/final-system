@@ -21,17 +21,17 @@ if not os.path.exists('/tmp/model/bert-base-chinese-pos'):
 if not os.path.exists('/tmp/model/bert-base-chinese-ner'):
     os.mkdir('/tmp/model/bert-base-chinese-ner')
 
-tokenizer = BertTokenizerFast.from_pretrained('bert-base-chinese', cache_dir='/tmp/model/bert-base-chinese')
-tokenizer.save_pretrained('/tmp/model/bert-base-chinese')
-del tokenizer
+# tokenizer = BertTokenizerFast.from_pretrained('bert-base-chinese', cache_dir='/tmp/model/bert-base-chinese')
+# tokenizer.save_pretrained('/tmp/model/bert-base-chinese')
+# del tokenizer
 
-model = AutoModelForTokenClassification.from_pretrained('ckiplab/bert-base-chinese-ner', cache_dir='/tmp/model/ckiplab/bert-base-chinese-ner')
-model.save_pretrained('/tmp/model/ckiplab/bert-base-chinese-ner')
-del model
+# model = AutoModelForTokenClassification.from_pretrained('ckiplab/bert-base-chinese-ner', cache_dir='/tmp/model/ckiplab/bert-base-chinese-ner')
+# model.save_pretrained('/tmp/model/ckiplab/bert-base-chinese-ner')
+# del model
 
-model = AutoModelForTokenClassification.from_pretrained('ckiplab/bert-base-chinese-pos', cache_dir='/tmp/model/ckiplab/bert-base-chinese-pos')
-model.save_pretrained('/tmp/model/ckiplab/bert-base-chinese-pos')
-del model
+# model = AutoModelForTokenClassification.from_pretrained('ckiplab/bert-base-chinese-pos', cache_dir='/tmp/model/ckiplab/bert-base-chinese-pos')
+# model.save_pretrained('/tmp/model/ckiplab/bert-base-chinese-pos')
+# del model
 
 def create_opinion_extraction_result(opinion_data:dict, table_name:str)->None:
         

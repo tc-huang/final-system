@@ -111,6 +111,6 @@ def lambda_handler(event, context):
 
     return transaction_result
 
-if __name__ == '__main__':
-    transaction_result = lambda_handler(event='2023-01-05', context=None)
-    print(transaction_result)
+# if __name__ == '__main__':
+#     transaction_result = lambda_handler(event='2023-01-05', context=None)
+#     print(transaction_result)

@@ -34,8 +34,8 @@ def ckip_ner_aws(doc):
                                 )
     ner_driver = CkipNerChunker(model="bert-base",
                                 device=0 if has_gpu else -1,
-                                model_name="/tmp/model/ckiplab/bert-base-chinese-ner",
-                                tokenizer_name="/tmp/model/bert-base-chinese")
+                                model_name="/tmp/bert_model/bert-base-chinese-ner",
+                                tokenizer_name="/tmp/bert_model/bert-base-chinese")
     
     ner_result = ner_driver([str(doc)], show_progress=False)#   ner_result is List[List[]]
     NerToken_spans = []
@@ -51,8 +51,8 @@ def ckip_ner_aws(doc):
 def ckip_pos_aws(doc):
     pos_driver = CkipPosTagger(model="bert-base",
                                device=0 if has_gpu else -1,
-                               model_name="/tmp/model/ckiplab/bert-base-chinese-pos",
-                               tokenizer_name="/tmp/model/bert-base-chinese")
+                               model_name="/tmp/bert_model/bert-base-chinese-pos",
+                               tokenizer_name="/tmp/bert_model/bert-base-chinese")
     
     tokens = [token.text for token in doc]
     pos_result = pos_driver([tokens], show_progress=False)#   pos_result is List[List[]]

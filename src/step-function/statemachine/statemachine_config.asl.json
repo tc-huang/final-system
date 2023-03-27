@@ -50,27 +50,8 @@
                           "BackoffRate": 2
                         }
                       ],
-                      "Next": "opinion_extraction"
-                    },
-                    "opinion_extraction": {
-                      "Type": "Task",
-                      "InputPath": "$.stanza_and_ckip_pipeline_output",
-                      "Resource": "${OpinionExtractionFunctionArn}",
-                      "Retry": [
-                        {
-                          "ErrorEquals": [
-                            "Lambda.ServiceException",
-                            "Lambda.AWSLambdaException",
-                            "Lambda.SdkClientException",
-                            "Lambda.TooManyRequestsException"
-                          ],
-                          "IntervalSeconds": 2,
-                          "MaxAttempts": 6,
-                          "BackoffRate": 2
-                        }
-                      ],
                       "End": true
-                    }
+                    } 
                   }
                 },
                 "Next": "success_opinion_extraction"

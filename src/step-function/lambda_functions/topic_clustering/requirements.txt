@@ -1,3 +1,2 @@
-requests
 psycopg[binary]==3.1.8
 scikit-learn
