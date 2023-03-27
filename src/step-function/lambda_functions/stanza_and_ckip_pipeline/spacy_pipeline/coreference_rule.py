@@ -52,7 +52,7 @@ def pronounce_matcher(nlp, name, target_spangroup_key, target_span_label, new_sp
     return pronounce_matcher_component
 
 @Language.factory("pronounce_matcher_found")
-def pronounce_matcher(nlp, name, target_spangroup_key, target_span_label, new_spangroup_key):
+def pronounce_matcher(nlp, name, target_spangroup_key, target_span_label):
     def prnoun_match_rule(span):
         if all(target_span_label in token._.label_type for token in span):
             if len(span) == 1:
@@ -85,8 +85,8 @@ def pronounce_matcher(nlp, name, target_spangroup_key, target_span_label, new_sp
                 if span[0].pos_ == "DET" and all(["NOUN" in token.pos_ for token in span[1:]]):
                     return True # 該綠營人士 這名黨政人士 該人士 該立委
                 
-                elif span[0].pos_ == "NUM" and all(["NOUN" in token.pos_ for token in span[1:]]):
-                    return True # 3位監委 2位監委
+                # elif span[0].pos_ == "NUM" and all(["NOUN" in token.pos_ for token in span[1:]]):
+                #     return True # 3位監委 2位監委
 
         return False
     
@@ -95,9 +95,9 @@ def pronounce_matcher(nlp, name, target_spangroup_key, target_span_label, new_sp
             for span in doc.spans[target_spangroup_key]:
                 if span.label_ == target_span_label:
                     if prnoun_match_rule(span):
-                        if new_spangroup_key in doc.spans:
-                            doc.spans[new_spangroup_key].append(span)
+                        if 'Prounce_found' in doc.spans:
+                            doc.spans['Prounce_found'].append(span)
                         else:
-                            doc.spans[new_spangroup_key] = [span] 
+                            doc.spans['Prounce_found'] = [span] 
         return doc
     return pronounce_matcher_component

@@ -12,14 +12,14 @@ import psycopg_methods
 import pathlib
 import configparser
 
-if not os.path.exists('/tmp/model'):
-    os.mkdir('/tmp/model')
-if not os.path.exists('/tmp/model/bert-base-chinese'):
-    os.mkdir('/tmp/model/bert-base-chinese')
-if not os.path.exists('/tmp/model/bert-base-chinese-pos'):
-    os.mkdir('/tmp/model/bert-base-chinese-pos')
-if not os.path.exists('/tmp/model/bert-base-chinese-ner'):
-    os.mkdir('/tmp/model/bert-base-chinese-ner')
+# if not os.path.exists('/tmp/model'):
+#     os.mkdir('/tmp/model')
+# if not os.path.exists('/tmp/model/bert-base-chinese'):
+#     os.mkdir('/tmp/model/bert-base-chinese')
+# if not os.path.exists('/tmp/model/bert-base-chinese-pos'):
+#     os.mkdir('/tmp/model/bert-base-chinese-pos')
+# if not os.path.exists('/tmp/model/bert-base-chinese-ner'):
+#     os.mkdir('/tmp/model/bert-base-chinese-ner')
 
 # tokenizer = BertTokenizerFast.from_pretrained('bert-base-chinese', cache_dir='/tmp/model/bert-base-chinese')
 # tokenizer.save_pretrained('/tmp/model/bert-base-chinese')
@@ -52,6 +52,7 @@ def create_opinion_extraction_result(opinion_data:dict, table_name:str)->None:
             opinion_data['opinion_group_id'],
             opinion_data['opinion_group_show']
         ]
+        print(opinion_data_list)
 
 
 
@@ -106,14 +107,16 @@ def opinion_in_docs_to_db(docs):
                     'opinion_group_show': True,
                 } 
             for span in doc.spans[f"opinion_found[{opinion_index}]"]:
-                if span.label_ == 'OPINION_SRC_match':
+                if span.label_ == 'OPINION_SRC_found':
                     opinion_data['OPINION_SRCs'].append(span.text)
-                elif span.label_ == 'OPINION_OPR_match':
+                elif span.label_ == 'OPINION_OPR_found':
                     opinion_data['OPINION_OPRs'].append(span.text)
-                elif span.label_ == 'OPINION_SEG_match':
+                elif span.label_ == 'OPINION_SEG_found':
                     opinion_data['OPINION_SEGs'].append(span.text)
+                # print(span, span.label_)
                 
             create_opinion_extraction_result(opinion_data, OPINION_TABLE_NAME)
+            opinion_index += 1
 
 
 
@@ -140,15 +143,28 @@ def lambda_handler(event, context):
 
     news = event
     content = news['content']
+    news_uid = news['uid']
+    time = news['time']
+    title = news['title']
+
 
     pipeline = pipeline_setup.get_aws_pipeline()
     
-    docs = [doc for doc in pipeline.pipe(content)]
+    docs = []
+
+    for index, doc in enumerate(pipeline.pipe(content)):
+        doc._.news_uid = news_uid
+        doc._.news_title = title
+        doc._.paragraph_index = index
+        docs.append(doc)
+
+    opinion_in_docs_to_db(docs)
 
     
 
     transaction_result = {
-        "stanza_and_ckip_pipeline_output": event,  # Timestamp of the when the transaction was completed
+        "stanza_and_ckip_pipeline_output": "",  # Timestamp of the when the transaction was completed
+
     }
 
 
