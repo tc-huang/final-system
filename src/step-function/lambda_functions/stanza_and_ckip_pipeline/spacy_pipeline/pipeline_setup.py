@@ -3,6 +3,7 @@ import spacy_stanza
 import torch
 import stanza
 
+
 from .ckip import ckip_ner, ckip_pos, ckip_ner_aws, ckip_pos_aws
 from .opinion_rule import opinion_matcher
 
@@ -106,6 +107,7 @@ def get_aws_pipeline():
         ]
     }
     stanza.download(lang='zh-hant', model_dir='/tmp/stanza_resources')
+
     set_all_extensions()
     spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', dir='/tmp/stanza_resources', download_method=None, use_gpu=has_gpu)
     spacy_pipeline.add_pipe('ckip_pos_aws', last=True)

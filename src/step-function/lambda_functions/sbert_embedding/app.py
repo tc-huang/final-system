@@ -1,9 +1,29 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from sentence_transformers import SentenceTransformer
 import psycopg_methods
 import pickle
 import pathlib
 import configparser
+
+def get_title_content_uid(uid_list):
+# date like '2023-01-01'
+
+    config_path = pathlib.Path(__file__).parent.absolute() / 'config.cfg'
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    
+    SELECT_NEWS_DATA_TABLE_NAME = config['PostgreSQL']['SELECT_NEWS_DATA_TABLE_NAME']
+
+    uid_list = str(uid_list)[1:-1]
+    
+    sql = f"""
+        SELECT time, title, content, uid FROM {SELECT_NEWS_DATA_TABLE_NAME}
+        WHERE uid in ({uid_list});
+        """
+    
+    rows = psycopg_methods.execute_sql(sql)
+    
+    return rows
 
 def create_validate_content(content):
     import re
@@ -79,16 +99,29 @@ def lambda_handler(event, context):
         dict: Object containing details of the stock buying transaction
     """
 
-    all_news = event
 
-    time = None
+
+    # date = event
+    # input_date_str = date
+
+    # time = None
+    # input_date_str = date
+    
+    # input_date = datetime.strptime(input_date_str, '%Y-%m-%d')
+    # date_add = input_date + timedelta(days=1)
+    # date_add_str = str(date_add.date())
+    uid_list = event
+    
+
+    all_news = get_title_content_uid(uid_list)
+    date = None
 
     for news in all_news:
 
-        time = datetime.strptime(news['time'], '%Y-%m-%d %H:%M:%S')
-        one_news_to_vector(time, news['title'], news['content'], news['uid'])
+        # time = datetime.strptime(news['time'], '%Y-%m-%d %H:%M:%S')
+        one_news_to_vector(news['time'], news['title'], news['content'], news['uid'])
 
-    date = time.strftime('%Y-%m-%d')
+        date = news['time'].strftime('%Y-%m-%d')
 
     transaction_result = {
         "sbert_embedding": datetime.now().isoformat(),  # Timestamp of the when the transaction was completed

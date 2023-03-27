@@ -40,8 +40,13 @@ def lambda_handler(event, context):
             post_params = None 
         
         if api_path == "/news":
+            if 'date' in post_params:
+                date = post_params['date']
+                result = timeline_data.get_timeline_data(date)
+            else:
+                result = timeline_data.get_timeline_data()
             # result = news_data_select.get_time_source_title_url_news_uid()
-            result = timeline_data.get_timeline_data()
+            
         
         elif api_path == "/person":
             if 'category' in post_params:
@@ -68,7 +73,11 @@ def lambda_handler(event, context):
                 }
         
         elif api_path == "/cluster":
-            result = topic_cluster_data.get_topic_cluster_data()
+            if 'date' in post_params:
+                date = post_params['date']
+                result = topic_cluster_data.get_topic_cluster_data(date) 
+            else:
+                result = topic_cluster_data.get_topic_cluster_data()
         
         elif api_path == "/sql":
             if 'sql' in post_params:
@@ -108,7 +117,10 @@ def lambda_handler(event, context):
             "body": json.dumps(
                 {
                     "message": "Internal Server Error",
-                    "error": str(e)
+                    "error": str(e),
+                    "event":event,
+                    "context":context
+
                 },
                 indent=4,
                 ensure_ascii=False,

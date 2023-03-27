@@ -84,8 +84,9 @@ def lambda_handler(event, context):
     """
 
     date = event
-    to_date_exclude = datetime.strptime(date, '%Y-%m-%d') + timedelta(days=1)
-    from_date_include = to_date_exclude - timedelta(days=8)
+    cluster_time = datetime.strptime(date, '%Y-%m-%d')
+    to_date_exclude = cluster_time + timedelta(days=1)
+    from_date_include = to_date_exclude - timedelta(days=5)
     from_date_include_str = from_date_include.strftime('%Y-%m-%d')
     to_date_include_str = to_date_exclude.strftime('%Y-%m-%d')
 
@@ -103,7 +104,7 @@ def lambda_handler(event, context):
         compute_full_tree=True,
     ).fit(sbert_embedding_list)
     cluster_assignment = clustering.labels_
-    cluster_result_to_db(news_uid_list, cluster_assignment, to_date_include_str) 
+    cluster_result_to_db(news_uid_list, cluster_assignment, cluster_time) 
 
     transaction_result = {
         "topic_clustering": datetime.now().isoformat(),  # Timestamp of the when the transaction was completed

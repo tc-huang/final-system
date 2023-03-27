@@ -30,7 +30,7 @@
             "map_each_news": {
               "Type": "Map",
               "ItemsPath": "$.news_docs_bytes_list",
-              "MaxConcurrency": 10,
+              "MaxConcurrency": 100,
               "Iterator": {
                 "StartAt": "stanza_and_ckip_pipeline",
                 "States": {

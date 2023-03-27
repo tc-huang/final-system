@@ -1,37 +1,30 @@
 from datetime import datetime
-import spacy
-import stanza
-import spacy_stanza
-from ckip_transformers.nlp import CkipPosTagger, CkipNerChunker
-from transformers import AutoModelForTokenClassification, BertTokenizerFast 
-import os
 from spacy_pipeline import pipeline_setup
 import random
 import uuid
 import psycopg_methods
 import pathlib
 import configparser
+import json
+# import os
+def get_title_content_uid(news_uid):
+# date like '2023-01-01'
 
-# if not os.path.exists('/tmp/model'):
-#     os.mkdir('/tmp/model')
-# if not os.path.exists('/tmp/model/bert-base-chinese'):
-#     os.mkdir('/tmp/model/bert-base-chinese')
-# if not os.path.exists('/tmp/model/bert-base-chinese-pos'):
-#     os.mkdir('/tmp/model/bert-base-chinese-pos')
-# if not os.path.exists('/tmp/model/bert-base-chinese-ner'):
-#     os.mkdir('/tmp/model/bert-base-chinese-ner')
-
-# tokenizer = BertTokenizerFast.from_pretrained('bert-base-chinese', cache_dir='/tmp/model/bert-base-chinese')
-# tokenizer.save_pretrained('/tmp/model/bert-base-chinese')
-# del tokenizer
-
-# model = AutoModelForTokenClassification.from_pretrained('ckiplab/bert-base-chinese-ner', cache_dir='/tmp/model/ckiplab/bert-base-chinese-ner')
-# model.save_pretrained('/tmp/model/ckiplab/bert-base-chinese-ner')
-# del model
-
-# model = AutoModelForTokenClassification.from_pretrained('ckiplab/bert-base-chinese-pos', cache_dir='/tmp/model/ckiplab/bert-base-chinese-pos')
-# model.save_pretrained('/tmp/model/ckiplab/bert-base-chinese-pos')
-# del model
+    config_path = pathlib.Path(__file__).parent.absolute() / 'config.cfg'
+    config = configparser.ConfigParser()
+    config.read(config_path)
+    
+    SELECT_NEWS_DATA_TABLE_NAME = config['PostgreSQL']['SELECT_NEWS_DATA_TABLE_NAME']
+    
+    sql = f"""
+        SELECT time, title, content, uid FROM {SELECT_NEWS_DATA_TABLE_NAME}
+        WHERE uid='{news_uid}'
+        LIMIT 1;
+        """
+    
+    rows = psycopg_methods.execute_sql(sql)
+    
+    return rows
 
 def create_opinion_extraction_result(opinion_data:dict, table_name:str)->None:
         
@@ -54,8 +47,6 @@ def create_opinion_extraction_result(opinion_data:dict, table_name:str)->None:
         ]
         print(opinion_data_list)
 
-
-
         sql = f"""
             CREATE TABLE if NOT EXISTS {table_name} (
                 opinion_uid uuid,
@@ -68,9 +59,7 @@ def create_opinion_extraction_result(opinion_data:dict, table_name:str)->None:
                 OPINION_SRC_resolution text[],
                 OPINION_SRC_name_found text[],
                 opinion_group_id text,
-                opinion_group_show boolean,
-                
-                primary key (opinion_uid)
+                opinion_group_show boolean
             );
 
             SET TIME ZONE 'Asia/Taipei';
@@ -88,6 +77,8 @@ def opinion_in_docs_to_db(docs):
     config_path = pathlib.Path(__file__).parent.absolute() / 'config.cfg'
     config = configparser.ConfigParser()
     config.read(config_path)
+
+    opinion_data_list = []
     
     OPINION_TABLE_NAME = config['PostgreSQL']['OPINION_TABLE_NAME']
     for doc in docs:
@@ -117,8 +108,9 @@ def opinion_in_docs_to_db(docs):
                 
             create_opinion_extraction_result(opinion_data, OPINION_TABLE_NAME)
             opinion_index += 1
+            opinion_data_list.append(opinion_data)
 
-
+    return opinion_data_list
 
 
 def lambda_handler(event, context):
@@ -140,12 +132,19 @@ def lambda_handler(event, context):
     ------
         dict: Object containing details of the stock buying transaction
     """
-
-    news = event
+    # print('pwd: ', os.getcwd())
+    # print('listdir .', os.listdir('.'))
+    # print('listdir /tmp', os.listdir('/tmp'))
+    # print('listdir /tmp/bert_model', os.listdir('/tmp/bert_model'))
+    # print('listdir /tmp/bert_model/bert-base-chinese-pos', os.listdir('/tmp/bert_model/bert-base-chinese-pos'))
+    # print('listdir /tmp/bert_model/bert-base-chinese-ner', os.listdir('/tmp/bert_model/bert-base-chinese-ner'))
+    news_uid = event
+    news = get_title_content_uid(news_uid)[0]
     content = news['content']
     news_uid = news['uid']
     time = news['time']
     title = news['title']
+    print(news)
 
 
     pipeline = pipeline_setup.get_aws_pipeline()
@@ -158,14 +157,11 @@ def lambda_handler(event, context):
         doc._.paragraph_index = index
         docs.append(doc)
 
-    opinion_in_docs_to_db(docs)
-
-    
+    opinion_data_list = opinion_in_docs_to_db(docs)
 
     transaction_result = {
-        "stanza_and_ckip_pipeline_output": "",  # Timestamp of the when the transaction was completed
+        "stanza_and_ckip_pipeline_output": json.dumps(opinion_data_list, default=str, ensure_ascii=False)  # Timestamp of the when the transaction was completed
 
     }
-
 
     return transaction_result
