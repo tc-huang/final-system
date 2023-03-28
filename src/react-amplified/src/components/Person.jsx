@@ -137,7 +137,7 @@ function TimeLine(props) {
                               <>
                                 <Card>
                                   <Title level={5}>
-                                    {value.OPINION_SRC_found.join(" ")}
+                                    {value.OPINION_SRC_found.join(" ")}{value.opinion_src_resolution != null && "(" + value.opinion_src_resolution.join(" ") + ")"}
                                   </Title>
                                   <Title level={4} type="danger">
                                     {value.OPINION_OPR_found.join(" ")}

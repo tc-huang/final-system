@@ -13,6 +13,8 @@ import {
 } from "antd";
 import { FileOutlined } from "@ant-design/icons";
 
+
+
 import Timeline from "@mui/lab/Timeline";
 import TimelineItem from "@mui/lab/TimelineItem";
 import TimelineSeparator from "@mui/lab/TimelineSeparator";
@@ -32,71 +34,76 @@ function TimeLine(props) {
   if (!cluster_data) return "No data!";
 
 
-  if (Array.isArray(cluster_data)) {
-    console.log("cluster array", cluster_data);
+  if (Array.isArray(props.data)) {
+    console.log("cluster array", props.data);
     let cluser_index = 0;
     return (
       <>
         {/* <Divider orientation="left">{item['title']}</Divider> */}
-        {cluster_data.map((data) => {
+        {props.data.map((data) => {
           return (
             <>
-                <Divider orientation="left">News Cluster [{cluser_index++}]</Divider>
-                <Timeline
-                sx={{
-                    [`& .${timelineOppositeContentClasses.root}`]: { flex: 0.2 },
-                }}
-                >
-            {data.cluster_news_data_list.map((val) => {
-                    return (
-                    <TimelineItem>
-                        <TimelineOppositeContent color="textSecondary">
-                        {val.time}
-                        </TimelineOppositeContent>
-                        <TimelineSeparator>
-                        <TimelineDot />
-                        <TimelineConnector />
-                        </TimelineSeparator>
-                        <TimelineContent>
-                        <Link to={"/news/" + val.id}>{val.title}</Link>
-                        <Collapse ghost>
-                            <Panel header="閱讀人物意見">
-                            <>
-                                {val.opinion_list.map((value) => {
-                                return (
-                                    <>
-                                    <Card>
-                                        <Title level={5}>
-                                        {value.OPINION_SRC_found.join(" ")}
-                                        </Title>
-                                        <Title level={4} type="danger">
-                                        {value.OPINION_OPR_found.join(" ")}
-                                        </Title>
-                                        <Title level={5}>
-                                        {value.OPINION_SEG_found.join("\n")}
-                                        </Title>
-                                        <Collapse ghost>
-                                        <Panel header="來源段落">
-                                            <Title level={5} type="secondary">
-                                            {val.content[value.paragraph_index]}
-                                            </Title>
-                                        </Panel>
-                                        </Collapse>
-                                    </Card>
-                                    </>
-                                );
-                                })}
-                            </>
-                            <div>
-                                <a href={val.url}>[{val.source}原文]</a>
-                            </div>
-                            </Panel>
-                        </Collapse>
-                        </TimelineContent>
-                    </TimelineItem>
-                    );
-                })}
-                </Timeline>
+                <Collapse size="large">
+                  <Panel header={"新聞分群 ["+(cluser_index++)+"]"} key="1">
+
+                  {/* <Divider orientation="left">News Cluster [{cluser_index++}]</Divider> */}
+                  <Timeline
+                  sx={{
+                      [`& .${timelineOppositeContentClasses.root}`]: { flex: 0.2 },
+                  }}
+                  >
+              {data.cluster_news_data_list.map((val) => {
+                      return (
+                      <TimelineItem>
+                          <TimelineOppositeContent color="textSecondary">
+                          {val.time}
+                          </TimelineOppositeContent>
+                          <TimelineSeparator>
+                          <TimelineDot />
+                          <TimelineConnector />
+                          </TimelineSeparator>
+                          <TimelineContent>
+                          <Link to={"/news/" + val.id}>{val.title}</Link>
+                          <Collapse ghost>
+                              <Panel header="閱讀人物意見">
+                              <>
+                                  {val.opinion_list.map((value) => {
+                                  return (
+                                      <>
+                                      <Card>
+                                          <Title level={5}>
+                                          {value.OPINION_SRC_found.join(" ")}{value.opinion_src_resolution != null && "(" + value.opinion_src_resolution.join(" ") + ")"}
+                                          </Title>
+                                          <Title level={4} type="danger">
+                                          {value.OPINION_OPR_found.join(" ")}
+                                          </Title>
+                                          <Title level={5}>
+                                          {value.OPINION_SEG_found.join("\n")}
+                                          </Title>
+                                          <Collapse ghost>
+                                          <Panel header="來源段落">
+                                              <Title level={5} type="secondary">
+                                              {val.content[value.paragraph_index]}
+                                              </Title>
+                                          </Panel>
+                                          </Collapse>
+                                      </Card>
+                                      </>
+                                  );
+                                  })}
+                              </>
+                              <div>
+                                  <a href={val.url}>[{val.source}原文]</a>
+                              </div>
+                              </Panel>
+                          </Collapse>
+                          </TimelineContent>
+                      </TimelineItem>
+                      );
+                  })}
+                  </Timeline>
+                </Panel>
+              </Collapse>
             </>
           );
         })}
@@ -108,15 +115,15 @@ function TimeLine(props) {
 function ShowContent(props) {
   const [show_data, setShowData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState(props.date);
 
   let show_type = props.show_type;
-  let date = props.date;
 
   const post_url =
-    "https://6pd8cpbd2g.execute-api.us-east-1.amazonaws.com/Prod/cluster?=";
+    "https://6pd8cpbd2g.execute-api.us-east-1.amazonaws.com/Prod/cluster?";
 
   useEffect(() => {
-    fetch(post_url, { method: "POST" })
+    fetch(post_url + "date=" + props.date, { method: "POST" })
       .then((response) => response.json())
       .then((data) => {
         setLoading(false);
@@ -127,7 +134,7 @@ function ShowContent(props) {
         console.log("Post Error: ", error);
         setLoading(false);
       });
-  }, [show_type, date]);
+  }, [show_type, props.date]);
 
   if (loading) return <span>"Loading..."</span>;
   if (!show_data) return "No data!";
@@ -144,6 +151,7 @@ export default function TodaysNews(props) {
   };
   const onChange = (date, dateString) => {
     console.log(date, dateString);
+    setDate(dateString)
   };
 
   return (

@@ -29,10 +29,11 @@ const { Title } = Typography;
 function TimeLine(props) {
   let [data, setData] = useState(props.data);
 
+
   if (!data) return "No data!";
 
-  if (Array.isArray(data)) {
-    console.log("data timeline array", data);
+  if (Array.isArray(props.data)) {
+    console.log("data timeline array", props.data);
     return (
       <>
         {/* <Divider orientation="left">{item['title']}</Divider> */}
@@ -41,7 +42,7 @@ function TimeLine(props) {
             [`& .${timelineOppositeContentClasses.root}`]: { flex: 0.2 },
           }}
         >
-          {data.map((val) => {
+          {props.data.map((val) => {
             return (
               <TimelineItem>
                 <TimelineOppositeContent color="textSecondary">
@@ -61,7 +62,7 @@ function TimeLine(props) {
                             <>
                               <Card>
                                 <Title level={5}>
-                                  {value.OPINION_SRC_found.join(" ")}
+                                  {value.OPINION_SRC_found.join(" ")}{value.opinion_src_resolution != null && " (可能為： " + value.opinion_src_resolution.join(" ") + ")"}
                                 </Title>
                                 <Title level={4} type="danger">
                                   {value.OPINION_OPR_found.join(" ")}
@@ -151,15 +152,16 @@ function TimeLine(props) {
 function ShowContent(props) {
   const [show_data, setShowData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [date, setDate] = useState(props.date);
+  console.log("props date : " + props.date)
 
   let show_type = props.show_type;
-  let date = props.date;
 
   const post_url =
-    "https://6pd8cpbd2g.execute-api.us-east-1.amazonaws.com/Prod/news?=";
-
+    "https://6pd8cpbd2g.execute-api.us-east-1.amazonaws.com/Prod/news?";
   useEffect(() => {
-    fetch(post_url, { method: "POST" })
+    console.log("render show content!" + props.date);
+    fetch(post_url + "date=" + props.date, { method: "POST" })
       .then((response) => response.json())
       .then((data) => {
         setLoading(false);
@@ -170,7 +172,7 @@ function ShowContent(props) {
         console.log("Post Error: ", error);
         setLoading(false);
       });
-  }, [show_type, date]);
+  }, [show_type, props.date]);
 
   if (loading) return <span>"Loading..."</span>;
   if (!show_data) return "No data!";
@@ -186,7 +188,8 @@ export default function TodaysNews(props) {
     setCurrent(e.key);
   };
   const onChange = (date, dateString) => {
-    console.log(date, dateString);
+    console.log(dateString);
+    setDate(dateString)
   };
 
   return (

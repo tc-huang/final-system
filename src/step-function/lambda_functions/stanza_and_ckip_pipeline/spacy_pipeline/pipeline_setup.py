@@ -47,6 +47,8 @@ def get_pipeline():
 def get_opinion_pipeline(rule_version_and_pattenrn:dict):
     set_all_extensions()
     spacy_pipeline = spacy_stanza.load_pipeline("xx", lang='zh-hant', use_gpu=has_gpu)
+    spacy_pipeline.add_pipe('ckip_pos', last=True)
+    spacy_pipeline.add_pipe('ckip_ner', last=True)
     spacy_pipeline.add_pipe("opinion_matcher",
                         config={
                             "version": rule_version_and_pattenrn["version"],
