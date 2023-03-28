@@ -73,12 +73,75 @@ def create_opinion_extraction_result(opinion_data:dict, table_name:str)->None:
 
         psycopg_methods.execute_sql(sql, opinion_data_list, not_fetch=True)
 
+
+# def get_name_list(docs):
+#     ent_list_list = []
+#     for doc in docs:
+#         ent_list = [ent for ent in doc.ents if ent.label_ == "PERSON"]
+#         ent_list_list.append(ent_list)
+#     ent_list_list = [i.reverse() for i in ent_list_list]
+#     return ent_list_list.reverse()
+
+# def check_SRC_type(span):
+#     if len(span) == 1:
+#         token = span[0]
+#         if len(token) == 1:
+#             if token.pos_ == "PRON":
+#                 return "PRON" # 他
+#             elif token.pos_ == "PROPN":
+#                 return  token.text# 張
+#         # else:
+#         #     if token.pos_ == "NOUN":
+#         #         return True # 官員 總統
+    
+#     elif len(span) == 2:
+#         token1, token2 = span[0], span[1]
+#         if len(token1) == 1 and len(token2) == 2:
+#             if token1.pos_ == "PROPN" and token2.pos_ == "NOUN":
+#                 return token1.text # 蔡總統 盧市長
+        
+#         # if token1.pos_ == "NOUN" and token2.pos_ == "NOUN":
+#         #     return True # 媽媽市長 縣黨部
+    
+#     elif len(span) == 3:
+#         token1, token2, token3 = span[0], span[1], span[2]
+#         if len(token1) == 1 and len(token2) == 1 and len(token3) == 2:
+#             if token1.pos_ == "PROPN" and token2.pos_ == "PART" and token3.pos_ == "NOUN":
+#                 return token1.text # 賴副總統
+    
+#     if len(span) >= 2:
+#         if span[0].pos_ == "DET" and all(["NOUN" in token.pos_ for token in span[1:]]):
+#             return "DET" # 該綠營人士 這名黨政人士 該人士 該立委
+        
+#         # elif span[0].pos_ == "NUM" and all(["NOUN" in token.pos_ for token in span[1:]]):
+#         #     return True # 3位監委 2位監委
+#     return None
+
+# def find_pronoun_resolution(docs, doc, span):
+#     type_= check_SRC_type(span)
+#     if type_ != None:
+#         name_list = get_name_list(docs)
+#         start_paragraph_index = doc._.paragraph_index
+#         name_list = get_name_list(docs)
+#         name_list = name_list[:start_paragraph_index]
+#         name_list = [i.reverse() for i in name_list]
+#         name_list = name_list.reverse()
+
+
+#         if  type_ not in ["DET", "PRON"]:
+#             inverse_row = 
+#             for inverse_row in name_list:
+#                 for name in inverse_row:
+
+
+
 def opinion_in_docs_to_db(docs):
     config_path = pathlib.Path(__file__).parent.absolute() / 'config.cfg'
     config = configparser.ConfigParser()
     config.read(config_path)
 
     opinion_data_list = []
+    
     
     OPINION_TABLE_NAME = config['PostgreSQL']['OPINION_TABLE_NAME']
     for doc in docs:
@@ -100,6 +163,8 @@ def opinion_in_docs_to_db(docs):
             for span in doc.spans[f"opinion_found[{opinion_index}]"]:
                 if span.label_ == 'OPINION_SRC_found':
                     opinion_data['OPINION_SRCs'].append(span.text)
+                    
+
                 elif span.label_ == 'OPINION_OPR_found':
                     opinion_data['OPINION_OPRs'].append(span.text)
                 elif span.label_ == 'OPINION_SEG_found':
